@@ -29,8 +29,12 @@ class LogProcessor:
     def should_ignore_tribe(tribe: str) -> bool:
         """Check if the tribe should be ignored based on IGNORED_TRIBE config"""
         if not IGNORED_TRIBE or not tribe:
+            logger.info(f"No ignore check: IGNORED_TRIBE='{IGNORED_TRIBE}', event_tribe='{tribe}'")
             return False
-        return tribe.lower() == IGNORED_TRIBE.lower()
+        
+        should_ignore = tribe.lower() == IGNORED_TRIBE.lower()
+        logger.info(f"Checking ignore: IGNORED_TRIBE='{IGNORED_TRIBE}', event_tribe='{tribe}', should_ignore={should_ignore}")
+        return should_ignore
 
     @staticmethod
     def process_killer_info(killer_text: str) -> tuple:
