@@ -1,0 +1,60 @@
+services:
+  discord-bot:
+    build: 
+      context: ./src/discord-bot
+      dockerfile: Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - alert-network
+    volumes:
+      - ./src/discord-bot/logs:/app/logs
+
+  clean-data:
+    build: 
+      context: ./src/clean-data
+      dockerfile: Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - alert-network
+    volumes:
+      - ./src/clean-data/logs:/app/logs
+    expose:
+      - "8000"
+    depends_on:
+      - discord-bot
+
+  process-data:
+    build:
+      context: ./src/process-data
+      dockerfile: Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - alert-network
+    volumes:
+      - ./src/process-data/logs:/app/logs
+    expose:
+      - "8000"
+    depends_on:
+      - clean-data
+
+  alert-service:
+    build: 
+      context: ./src/alert-service
+      dockerfile: Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - alert-network
+    volumes:
+      - ./src/alert-service/logs:/app/logs
+    expose:
+      - "8000"
+    depends_on:
+      - process-data
+
+networks:
+  alert-network:
+    name: alert-network
