@@ -1,10 +1,25 @@
 import re
 import logging
 from config import IGNORED_TRIBE
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
 class LogProcessor:
+    @staticmethod
+    def adjust_timestamp(timestamp: str) -> str:
+        """Adjust timestamp by adding 3 hours"""
+        try:
+            # Parse the timestamp
+            dt = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+            # Add 3 hours
+            adjusted_dt = dt + timedelta(hours=3)
+            # Return formatted timestamp
+            return adjusted_dt.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            logger.error(f"Error adjusting timestamp: {str(e)}, timestamp: {timestamp}")
+            return timestamp
+
     @staticmethod
     def extract_creature_type(text: str) -> str:
         match = re.search(r'\(([^)]+)\)', text)
@@ -58,6 +73,8 @@ class LogProcessor:
     @staticmethod
     def process_log(log: dict) -> dict:
         message = log['message']
+        # Adjust timestamp before processing
+        adjusted_timestamp = LogProcessor.adjust_timestamp(log['timestamp'])
         
         if 'destroyed your' in message:
             match = re.search(r'(.*?) destroyed your \'([^\']+)\'', message)
@@ -73,7 +90,7 @@ class LogProcessor:
                     
                 return {
                     "event_type": "STRUCTURE_DESTROYED",
-                    "timestamp": log['timestamp'],
+                    "timestamp": adjusted_timestamp,
                     "map": log['map'],
                     "victim": structure,
                     "perpetrator": killer_name,
@@ -94,7 +111,7 @@ class LogProcessor:
                     
                 return {
                     "event_type": "MEMBER_KILLED",
-                    "timestamp": log['timestamp'],
+                    "timestamp": adjusted_timestamp,
                     "map": log['map'],
                     "victim": LogProcessor.process_victim_info(victim),
                     "perpetrator": killer_name,
@@ -115,7 +132,7 @@ class LogProcessor:
                     
                 return {
                     "event_type": "CREATURE_KILLED",
-                    "timestamp": log['timestamp'],
+                    "timestamp": adjusted_timestamp,
                     "map": log['map'],
                     "victim": LogProcessor.process_victim_info(victim),
                     "perpetrator": killer_name,
