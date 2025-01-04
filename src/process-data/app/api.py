@@ -4,7 +4,7 @@ import logging
 import aiohttp
 from logging.handlers import TimedRotatingFileHandler
 import os
-from typing import List, Optional
+from typing import List
 from processor import LogProcessor
 from config import LOG_LEVEL, LOG_FORMAT, ALERT_SERVICE_URL
 
