@@ -160,12 +160,21 @@ class WebhookService:
         return embed
 
     async def send_webhook(self, alert_data: dict) -> dict:
-        """Send formatted alert to Discord webhook with an @here mention."""
+        """Send formatted alert to Discord webhook"""
         try:
-            formatted_message = self._format_alert(alert_data)
+            formatted_message = {
+                "content": "<@&here>",
+                "embeds": [{
+                    "title": f"{self.ALERT_FORMATS[alert_data['event_type']]['title_emoji']} {self.ALERT_FORMATS[alert_data['event_type']]['title']} {self.ALERT_FORMATS[alert_data['event_type']]['title_emoji']}",
+                    "description": self.ALERT_FORMATS[alert_data['event_type']]['description'],
+                    "color": self.ALERT_FORMATS[alert_data['event_type']]['color'],
+                    "fields": self._format_alert(alert_data)["embeds"][0]["fields"],
+                    "footer": {
+                        "text": "ARK Alert System • Stay vigilant!"
+                    }
+                }]
+            }
             
-            formatted_message["content"] = "@here"
-
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     self.webhook_url,
