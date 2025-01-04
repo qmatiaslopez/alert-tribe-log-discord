@@ -163,7 +163,7 @@ class WebhookService:
         """Send formatted alert to Discord webhook"""
         try:
             formatted_message = {
-                "content": "<@&here>",
+                "content": "@here",
                 "embeds": [{
                     "title": f"{self.ALERT_FORMATS[alert_data['event_type']]['title_emoji']} {self.ALERT_FORMATS[alert_data['event_type']]['title']} {self.ALERT_FORMATS[alert_data['event_type']]['title_emoji']}",
                     "description": self.ALERT_FORMATS[alert_data['event_type']]['description'],
